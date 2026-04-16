@@ -24,3 +24,6 @@ Pipfile.lock
 
 # macOS
 .DS_Store
+
+.aider*
+logs/
