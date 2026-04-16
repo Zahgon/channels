@@ -29,54 +29,28 @@ class ChannelLayerManager:
         """
         Removes cached channel layers when the CHANNEL_LAYERS setting changes.
         """
-        if setting == "CHANNEL_LAYERS":
-            self.backends = {}
+        pass
 
     @property
     def configs(self):
         # Lazy load settings so we can be imported
-        return getattr(settings, "CHANNEL_LAYERS", {})
+        pass
 
     def make_backend(self, name):
         """
         Instantiate channel layer.
         """
-        config = self.configs[name].get("CONFIG", {})
-        return self._make_backend(name, config)
+        pass
 
     def make_test_backend(self, name):
         """
         Instantiate channel layer using its test config.
         """
-        try:
-            config = self.configs[name]["TEST_CONFIG"]
-        except KeyError:
-            raise InvalidChannelLayerError("No TEST_CONFIG specified for %s" % name)
-        return self._make_backend(name, config)
+        pass
 
     def _make_backend(self, name, config):
         # Check for old format config
-        if "ROUTING" in self.configs[name]:
-            raise InvalidChannelLayerError(
-                "ROUTING key found for %s - this is no longer needed in Channels 2."
-                % name
-            )
-        # Load the backend class
-        try:
-            backend_module = self.configs[name]["BACKEND"]
-        except KeyError:
-            raise InvalidChannelLayerError("No BACKEND specified for %s" % name)
-        else:
-            try:
-                backend_class = import_string(backend_module)
-            except ImportError:
-                raise InvalidChannelLayerError(
-                    "Cannot import BACKEND %r specified for %s"
-                    % (self.configs[name]["BACKEND"], name)
-                )
-
-        # Initialise and pass config
-        return backend_class(**config)
+        pass
 
     def __getitem__(self, key):
         if key not in self.backends:
@@ -92,9 +66,7 @@ class ChannelLayerManager:
         returns the old one that it replaced. Useful for swapping out the
         backend during tests.
         """
-        old = self.backends.get(key, None)
-        self.backends[key] = layer
-        return old
+        pass
 
 
 class BaseChannelLayer:
@@ -115,15 +87,7 @@ class BaseChannelLayer:
         Takes an input channel_capacity dict and returns the compiled list
         of regexes that get_capacity will look for as self.channel_capacity
         """
-        result = []
-        for pattern, value in channel_capacity.items():
-            # If they passed in a precompiled regex, leave it, else interpret
-            # it as a glob.
-            if hasattr(pattern, "match"):
-                result.append((pattern, value))
-            else:
-                result.append((re.compile(fnmatch.translate(pattern)), value))
-        return result
+        pass
 
     def get_capacity(self, channel):
         """
@@ -162,19 +126,10 @@ class BaseChannelLayer:
         return True
 
     def require_valid_group_name(self, name):
-        if not self.match_type_and_length(name):
-            raise TypeError(self.invalid_name_error.format("Group"))
-        if not bool(self.group_name_regex.match(name)):
-            raise TypeError(self.invalid_name_error.format("Group"))
-        return True
+        pass
 
     def valid_channel_names(self, names, receive=False):
-        _non_empty_list = True if names else False
-        _names_type = isinstance(names, list)
-        assert _non_empty_list and _names_type, "names must be a non-empty list"
-        for channel in names:
-            self.require_valid_channel_name(channel, receive=receive)
-        return True
+        pass
 
     def non_local_name(self, name):
         """
@@ -182,10 +137,7 @@ class BaseChannelLayer:
         is a process-specific channel (contains !) this means the part up to
         and including the !; if it is anything else, this means the full name.
         """
-        if "!" in name:
-            return name[: name.find("!") + 1]
-        else:
-            return name
+        pass
 
     async def send(self, channel, message):
         raise NotImplementedError("send() should be implemented in a channel layer")
@@ -215,23 +167,13 @@ class BaseChannelLayer:
         """
         Deprecated: Use require_valid_channel_name instead.
         """
-        warnings.warn(
-            "valid_channel_name is deprecated, use require_valid_channel_name instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.require_valid_channel_name(channel_name)
+        pass
 
     def valid_group_name(self, group_name):
         """
         Deprecated: Use require_valid_group_name instead..
         """
-        warnings.warn(
-            "valid_group_name is deprecated, use require_valid_group_name instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.require_valid_group_name(group_name)
+        pass
 
 
 class InMemoryChannelLayer(BaseChannelLayer):
@@ -287,31 +229,14 @@ class InMemoryChannelLayer(BaseChannelLayer):
         If more than one coroutine waits on the same channel, a random one
         of the waiting coroutines will get the result.
         """
-        self.require_valid_channel_name(channel)
-        self._clean_expired()
-
-        queue = self.channels.setdefault(
-            channel, asyncio.Queue(maxsize=self.get_capacity(channel))
-        )
-
-        # Do a plain direct receive
-        try:
-            _, message = await queue.get()
-        finally:
-            if queue.empty():
-                self.channels.pop(channel, None)
-
-        return message
+        pass
 
     async def new_channel(self, prefix="specific."):
         """
         Returns a new channel name that can be used by something in our
         process as a specific channel.
         """
-        return "%s.inmemory!%s" % (
-            prefix,
-            "".join(random.choice(string.ascii_letters) for i in range(12)),
-        )
+        pass
 
     # Expire cleanup
 
@@ -320,26 +245,7 @@ class InMemoryChannelLayer(BaseChannelLayer):
         Goes through all messages and groups and removes those that are expired.
         Any channel with an expired message is removed from all groups.
         """
-        # Channel cleanup
-        for channel, queue in list(self.channels.items()):
-            # See if it's expired
-            while not queue.empty() and queue._queue[0][0] < time.time():
-                queue.get_nowait()
-                # Any removal prompts group discard
-                self._remove_from_groups(channel)
-                # Is the channel now empty and needs deleting?
-                if queue.empty():
-                    self.channels.pop(channel, None)
-
-        # Group Expiration
-        timeout = int(time.time()) - self.group_expiry
-        for channels in self.groups.values():
-            for name, timestamp in list(channels.items()):
-                # If join time is older than group_expiry
-                # end the group membership
-                if timestamp and timestamp < timeout:
-                    # Delete from group
-                    channels.pop(name, None)
+        pass
 
     # Flush extension
 
@@ -355,8 +261,7 @@ class InMemoryChannelLayer(BaseChannelLayer):
         """
         Removes a channel from all groups. Used when a message on it expires.
         """
-        for channels in self.groups.values():
-            channels.pop(channel, None)
+        pass
 
     # Groups extension
 
@@ -364,43 +269,15 @@ class InMemoryChannelLayer(BaseChannelLayer):
         """
         Adds the channel name to a group.
         """
-        # Check the inputs
-        self.require_valid_group_name(group)
-        self.require_valid_channel_name(channel)
-        # Add to group dict
-        self.groups.setdefault(group, {})
-        self.groups[group][channel] = time.time()
+        pass
 
     async def group_discard(self, group, channel):
         # Both should be text and valid
-        self.require_valid_channel_name(channel)
-        self.require_valid_group_name(group)
-        # Remove from group set
-        group_channels = self.groups.get(group, None)
-        if group_channels:
-            # remove channel if in group
-            group_channels.pop(channel, None)
-            # is group now empty? If yes remove it
-            if not group_channels:
-                self.groups.pop(group, None)
+        pass
 
     async def group_send(self, group, message):
         # Check types
-        assert isinstance(message, dict), "Message is not a dict"
-        self.require_valid_group_name(group)
-        # Run clean
-        self._clean_expired()
-
-        # Send to each channel
-        ops = []
-        if group in self.groups:
-            for channel in self.groups[group].keys():
-                ops.append(asyncio.create_task(self.send(channel, message)))
-        for send_result in asyncio.as_completed(ops):
-            try:
-                await send_result
-            except ChannelFull:
-                pass
+        pass
 
 
 def get_channel_layer(alias=DEFAULT_CHANNEL_LAYER):

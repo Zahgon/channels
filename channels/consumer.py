@@ -91,8 +91,7 @@ class AsyncConsumer:
         """
 
         async def app(scope, receive, send):
-            consumer = cls(**initkwargs)
-            return await consumer(scope, receive, send)
+            pass
 
         app.consumer_class = cls
         app.consumer_initkwargs = initkwargs

@@ -22,14 +22,7 @@ class AsyncHttpConsumer(AsyncConsumer):
         sending the response to the client after ``self.send_body`` has been
         called the first time.
         """
-        if headers is None:
-            headers = []
-        elif isinstance(headers, dict):
-            headers = list(headers.items())
-
-        await self.send(
-            {"type": "http.response.start", "status": status, "headers": headers}
-        )
+        pass
 
     async def send_body(self, body, *, more_body=False):
         """
@@ -39,10 +32,7 @@ class AsyncHttpConsumer(AsyncConsumer):
         The default behavior closes the response, and further messages on
         the channel will be ignored.
         """
-        assert isinstance(body, bytes), "Body is not bytes"
-        await self.send(
-            {"type": "http.response.body", "body": body, "more_body": more_body}
-        )
+        pass
 
     async def send_response(self, status, body, **kwargs):
         """
@@ -50,8 +40,7 @@ class AsyncHttpConsumer(AsyncConsumer):
         ``self.send_headers`` and ``self.send_body``, and everything said
         above applies here as well. This method may only be called once.
         """
-        await self.send_headers(status=status, **kwargs)
-        await self.send_body(body)
+        pass
 
     async def handle(self, body):
         """
@@ -75,19 +64,10 @@ class AsyncHttpConsumer(AsyncConsumer):
         Async entrypoint - concatenates body fragments and hands off control
         to ``self.handle`` when the body has been completely received.
         """
-        if "body" in message:
-            self.body.append(message["body"])
-        if not message.get("more_body"):
-            try:
-                await self.handle(b"".join(self.body))
-            finally:
-                await self.disconnect()
-            raise StopConsumer()
+        pass
 
     async def http_disconnect(self, message):
         """
         Let the user do their cleanup and close the consumer.
         """
-        await self.disconnect()
-        await aclose_old_connections()
-        raise StopConsumer()
+        pass

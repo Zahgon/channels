@@ -48,10 +48,7 @@ class OriginValidator:
 
         Returns ``True`` if validation function was successful, ``False`` otherwise.
         """
-        # None is not allowed unless all hosts are allowed
-        if parsed_origin is None and "*" not in self.allowed_origins:
-            return False
-        return self.validate_origin(parsed_origin)
+        pass
 
     def validate_origin(self, parsed_origin):
         """
@@ -70,10 +67,7 @@ class OriginValidator:
 
         Returns ``True`` for a valid host, ``False`` otherwise.
         """
-        return any(
-            pattern == "*" or self.match_allowed_origin(parsed_origin, pattern)
-            for pattern in self.allowed_origins
-        )
+        pass
 
     def match_allowed_origin(self, parsed_origin, pattern):
         """
@@ -91,46 +85,14 @@ class OriginValidator:
         Note. This function assumes that the given origin is either None, a
         schema-domain-port string, or just a domain string
         """
-        if parsed_origin is None:
-            return False
-
-        # Get ResultParse object
-        parsed_pattern = urlparse(pattern.lower())
-        if parsed_origin.hostname is None:
-            return False
-        if not parsed_pattern.scheme:
-            pattern_hostname = urlparse("//" + pattern).hostname or pattern
-            return is_same_domain(parsed_origin.hostname, pattern_hostname)
-        # Get origin.port or default ports for origin or None
-        origin_port = self.get_origin_port(parsed_origin)
-        # Get pattern.port or default ports for pattern or None
-        pattern_port = self.get_origin_port(parsed_pattern)
-        # Compares hostname, scheme, ports of pattern and origin
-        if (
-            parsed_pattern.scheme == parsed_origin.scheme
-            and origin_port == pattern_port
-            and is_same_domain(parsed_origin.hostname, parsed_pattern.hostname)
-        ):
-            return True
-        return False
+        pass
 
     def get_origin_port(self, origin):
         """
         Returns the origin.port or port for this schema by default.
         Otherwise, it returns None.
         """
-        if origin.port is not None:
-            # Return origin.port
-            return origin.port
-        # if origin.port doesn`t exists
-        if origin.scheme == "http" or origin.scheme == "ws":
-            # Default port return for http, ws
-            return 80
-        elif origin.scheme == "https" or origin.scheme == "wss":
-            # Default port return for https, wss
-            return 443
-        else:
-            return None
+        pass
 
 
 def AllowedHostsOriginValidator(application):
@@ -150,4 +112,4 @@ class WebsocketDenier(AsyncWebsocketConsumer):
     """
 
     async def connect(self):
-        await self.close()
+        pass

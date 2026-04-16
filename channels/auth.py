@@ -163,17 +163,10 @@ class AuthMiddleware(BaseMiddleware):
 
     def populate_scope(self, scope):
         # Make sure we have a session
-        if "session" not in scope:
-            raise ValueError(
-                "AuthMiddleware cannot find session in scope. "
-                "SessionMiddleware must be above it."
-            )
-        # Add it to the scope if it's not there already
-        if "user" not in scope:
-            scope["user"] = UserLazyObject()
+        pass
 
     async def resolve_scope(self, scope):
-        scope["user"]._wrapped = await get_user(scope)
+        pass
 
     async def __call__(self, scope, receive, send):
         scope = dict(scope)

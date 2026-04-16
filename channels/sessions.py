@@ -163,8 +163,7 @@ class InstanceSessionWrapper:
         self.real_send = send
 
     async def resolve_session(self):
-        session_key = self.scope["cookies"].get(self.cookie_name)
-        self.scope["session"]._wrapped = self.session_store(session_key)
+        pass
 
     async def send(self, message):
         """

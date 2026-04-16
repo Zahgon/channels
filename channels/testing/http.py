@@ -34,23 +34,4 @@ class HttpCommunicator(ApplicationCommunicator):
         Get the application's response. Returns a dict with keys of
         "body", "headers" and "status".
         """
-        # If we've not sent the request yet, do so
-        if not self.sent_request:
-            self.sent_request = True
-            await self.send_input({"type": "http.request", "body": self.body})
-        # Get the response start
-        response_start = await self.receive_output(timeout)
-        assert response_start["type"] == "http.response.start"
-        # Get all body parts
-        response_start["body"] = b""
-        while True:
-            chunk = await self.receive_output(timeout)
-            assert chunk["type"] == "http.response.body"
-            assert isinstance(chunk["body"], bytes)
-            response_start["body"] += chunk["body"]
-            if not chunk.get("more_body", False):
-                break
-        # Return structured info
-        del response_start["type"]
-        response_start.setdefault("headers", [])
-        return response_start
+        pass

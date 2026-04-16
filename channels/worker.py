@@ -20,25 +20,10 @@ class Worker(StatelessServer):
         """
         Listens on all the provided channels and handles the messages.
         """
-        # For each channel, launch its own listening coroutine
-        listeners = []
-        for channel in self.channels:
-            listeners.append(asyncio.ensure_future(self.listener(channel)))
-        # Wait for them all to exit
-        await asyncio.wait(listeners)
-        # See if any of the listeners had an error (e.g. channel layer error)
-        [listener.result() for listener in listeners]
+        pass
 
     async def listener(self, channel):
         """
         Single-channel listener
         """
-        while True:
-            message = await self.channel_layer.receive(channel)
-            if not message.get("type", None):
-                raise ValueError("Worker received message with no type.")
-            # Make a scope and get an application instance for it
-            scope = {"type": "channel", "channel": channel}
-            instance_queue = self.get_or_create_application_instance(channel, scope)
-            # Run the message into the app
-            await instance_queue.put(message)
+        pass

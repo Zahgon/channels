@@ -28,42 +28,23 @@ class WebsocketConsumer(SyncConsumer):
         """
         Called when a WebSocket connection is opened.
         """
-        try:
-            for group in self.groups:
-                async_to_sync(self.channel_layer.group_add)(group, self.channel_name)
-        except AttributeError:
-            raise InvalidChannelLayerError(
-                "BACKEND is unconfigured or doesn't support groups"
-            )
-        try:
-            self.connect()
-        except AcceptConnection:
-            self.accept()
-        except DenyConnection:
-            self.close()
+        pass
 
     def connect(self):
-        self.accept()
+        pass
 
     def accept(self, subprotocol=None, headers=None):
         """
         Accepts an incoming socket
         """
-        message = {"type": "websocket.accept", "subprotocol": subprotocol}
-        if headers:
-            message["headers"] = list(headers)
-
-        super().send(message)
+        pass
 
     def websocket_receive(self, message):
         """
         Called when a WebSocket frame is received. Decodes it and passes it
         to receive().
         """
-        if message.get("text") is not None:
-            self.receive(text_data=message["text"])
-        else:
-            self.receive(bytes_data=message["bytes"])
+        pass
 
     def receive(self, text_data=None, bytes_data=None):
         """
@@ -100,17 +81,7 @@ class WebsocketConsumer(SyncConsumer):
         Called when a WebSocket connection is closed. Base level so you don't
         need to call super() all the time.
         """
-        try:
-            for group in self.groups:
-                async_to_sync(self.channel_layer.group_discard)(
-                    group, self.channel_name
-                )
-        except AttributeError:
-            raise InvalidChannelLayerError(
-                "BACKEND is unconfigured or doesn't support groups"
-            )
-        self.disconnect(message["code"])
-        raise StopConsumer()
+        pass
 
     def disconnect(self, code):
         """
@@ -127,10 +98,7 @@ class JsonWebsocketConsumer(WebsocketConsumer):
     """
 
     def receive(self, text_data=None, bytes_data=None, **kwargs):
-        if text_data:
-            self.receive_json(self.decode_json(text_data), **kwargs)
-        else:
-            raise ValueError("No text section for incoming WebSocket frame!")
+        pass
 
     def receive_json(self, content, **kwargs):
         """
@@ -142,15 +110,15 @@ class JsonWebsocketConsumer(WebsocketConsumer):
         """
         Encode the given content as JSON and send it to the client.
         """
-        super().send(text_data=self.encode_json(content), close=close)
+        pass
 
     @classmethod
     def decode_json(cls, text_data):
-        return json.loads(text_data)
+        pass
 
     @classmethod
     def encode_json(cls, content):
-        return json.dumps(content)
+        pass
 
 
 class AsyncWebsocketConsumer(AsyncConsumer):
@@ -169,41 +137,23 @@ class AsyncWebsocketConsumer(AsyncConsumer):
         """
         Called when a WebSocket connection is opened.
         """
-        try:
-            for group in self.groups:
-                await self.channel_layer.group_add(group, self.channel_name)
-        except AttributeError:
-            raise InvalidChannelLayerError(
-                "BACKEND is unconfigured or doesn't support groups"
-            )
-        try:
-            await self.connect()
-        except AcceptConnection:
-            await self.accept()
-        except DenyConnection:
-            await self.close()
+        pass
 
     async def connect(self):
-        await self.accept()
+        pass
 
     async def accept(self, subprotocol=None, headers=None):
         """
         Accepts an incoming socket
         """
-        message = {"type": "websocket.accept", "subprotocol": subprotocol}
-        if headers:
-            message["headers"] = list(headers)
-        await super().send(message)
+        pass
 
     async def websocket_receive(self, message):
         """
         Called when a WebSocket frame is received. Decodes it and passes it
         to receive().
         """
-        if message.get("text") is not None:
-            await self.receive(text_data=message["text"])
-        else:
-            await self.receive(bytes_data=message["bytes"])
+        pass
 
     async def receive(self, text_data=None, bytes_data=None):
         """
@@ -240,16 +190,7 @@ class AsyncWebsocketConsumer(AsyncConsumer):
         Called when a WebSocket connection is closed. Base level so you don't
         need to call super() all the time.
         """
-        try:
-            for group in self.groups:
-                await self.channel_layer.group_discard(group, self.channel_name)
-        except AttributeError:
-            raise InvalidChannelLayerError(
-                "BACKEND is unconfigured or doesn't support groups"
-            )
-        await self.disconnect(message["code"])
-        await aclose_old_connections()
-        raise StopConsumer()
+        pass
 
     async def disconnect(self, code):
         """
@@ -266,10 +207,7 @@ class AsyncJsonWebsocketConsumer(AsyncWebsocketConsumer):
     """
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
-        if text_data:
-            await self.receive_json(await self.decode_json(text_data), **kwargs)
-        else:
-            raise ValueError("No text section for incoming WebSocket frame!")
+        pass
 
     async def receive_json(self, content, **kwargs):
         """
@@ -281,12 +219,12 @@ class AsyncJsonWebsocketConsumer(AsyncWebsocketConsumer):
         """
         Encode the given content as JSON and send it to the client.
         """
-        await super().send(text_data=await self.encode_json(content), close=close)
+        pass
 
     @classmethod
     async def decode_json(cls, text_data):
-        return json.loads(text_data)
+        pass
 
     @classmethod
     async def encode_json(cls, content):
-        return json.dumps(content)
+        pass

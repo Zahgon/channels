@@ -8,11 +8,7 @@ class DatabaseSyncToAsync(SyncToAsync):
     """
 
     def thread_handler(self, loop, *args, **kwargs):
-        close_old_connections()
-        try:
-            return super().thread_handler(loop, *args, **kwargs)
-        finally:
-            close_old_connections()
+        pass
 
 
 # The class is TitleCased, but we want to encourage use as a callable/decorator
